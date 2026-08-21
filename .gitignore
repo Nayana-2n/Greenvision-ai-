@@ -4,6 +4,7 @@ dist/
 server/venv/
 __pycache__/
 *.pyc
+*.log
 server/data/
 server/models/
 Tree_AI_Backend/models/
