@@ -2,9 +2,7 @@
 
 AI-GIS Based Urban Green Cover Assessment for Carbon Sequestration and Oxygen Estimation.
 
-## Team
-- **Nayana**: Frontend, UI Architecture, GIS Integration (Leaflet & Chart.js), Flask Integration Layer.
-- **Kasumurthi Rishitha Sree**: AI/ML Lead (Tree Detection & Segmentation Models, Ecological Impact Logic).
+
 
 ## Project Structure
 ```
