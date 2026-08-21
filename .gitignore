@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+server/venv/
+__pycache__/
+*.pyc
+server/data/
+server/models/
+Tree_AI_Backend/models/
+*.pt
+temp_*.py

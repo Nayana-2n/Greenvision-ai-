@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+/* Tailwind v4 class-based dark mode variant */
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-earth: #C9A05C;
+  --color-canopy: #3FA34D;
+  --color-chlorophyll: #1B5E3A;
+  --color-databue: #4FA8D8;
+  --color-ink: #0B0F0D;
+  --color-panel: #121815;
+  --color-mist: #EDF2ED;
+  --color-mist-dim: #9FB0A6;
+}
+
+/* ── Dark theme (default) ────────────────────────────── */
+.dark body,
+body {
+  background: var(--color-ink);
+  color: var(--color-mist);
+  font-family: var(--font-body);
+}
+
+/* ── Light theme overrides ───────────────────────────── */
+.light body {
+  background: #F7FAF7;
+  color: var(--color-ink);
+}
+
+/* ── Gradient utilities ──────────────────────────────── */
+.ndvi-gradient {
+  background: linear-gradient(90deg, var(--color-earth) 0%, var(--color-canopy) 50%, var(--color-chlorophyll) 100%);
+}
+
+.ndvi-text {
+  background: linear-gradient(90deg, var(--color-earth) 0%, var(--color-canopy) 55%, var(--color-databue) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Scanline & animations ───────────────────────────── */
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(63,163,77,0.15), transparent);
+  animation: sweep 4.5s ease-in-out infinite;
+}
+
+@keyframes sweep {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* ── Smooth scroll ───────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Selection color ─────────────────────────────────── */
+::selection {
+  background-color: rgba(63, 163, 77, 0.3);
+  color: var(--color-mist);
+}
+
+/* ── Scrollbar styling (Webkit) ──────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(159, 176, 166, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(159, 176, 166, 0.5);
+}
