@@ -80,8 +80,8 @@ function PodiumCard({ entry, height, delay, color }) {
         <div className={`w-12 h-12 rounded-full ${color} flex items-center justify-center font-display font-bold text-xl text-white mb-2`}>
           {RANK_ICON[entry.rank] || entry.rank}
         </div>
-        <p className="font-display font-bold text-sm text-mist light:text-ink text-center truncate max-w-[120px]">{entry.name}</p>
-        <p className="text-[10px] font-mono text-mist-dim light:text-ink/50 mt-0.5">{entry.contributions} contribution{entry.contributions === 1 ? '' : 's'}</p>
+        <p className="font-display font-bold text-sm text-mist light:text-ink text-center leading-tight px-1">{entry.name}</p>
+        <p className="text-[10px] font-mono text-mist-dim light:text-ink/50 mt-1">{entry.contributions} contribution{entry.contributions === 1 ? '' : 's'}</p>
         <p className="font-mono font-bold text-canopy text-lg mt-1">
           <AnimatedNumber value={entry.points} />
         </p>
@@ -129,10 +129,10 @@ function OrgInfoTab({ orgType, orgLabel, orgs }) {
           reflect reported activity, not independently verified outcomes.
         </p>
         {top3.length >= 3 && (
-          <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto mb-6">
-            <PodiumCard entry={{ rank: 2, name: top3[1].name, contributions: top3[1].contributions, points: top3[1].points }} height="h-36" delay={100} color="bg-slate-400" />
-            <PodiumCard entry={{ rank: 1, name: top3[0].name, contributions: top3[0].contributions, points: top3[0].points }} height="h-44" delay={0} color="bg-amber-400" />
-            <PodiumCard entry={{ rank: 3, name: top3[2].name, contributions: top3[2].contributions, points: top3[2].points }} height="h-32" delay={200} color="bg-orange-400" />
+              <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto mb-6">
+            <PodiumCard entry={{ rank: 2, name: top3[1].name, contributions: top3[1].contributions, points: top3[1].points }} height="h-40" delay={100} color="bg-slate-400" />
+            <PodiumCard entry={{ rank: 1, name: top3[0].name, contributions: top3[0].contributions, points: top3[0].points }} height="h-48" delay={0} color="bg-amber-400" />
+            <PodiumCard entry={{ rank: 3, name: top3[2].name, contributions: top3[2].contributions, points: top3[2].points }} height="h-40" delay={200} color="bg-orange-400" />
           </div>
         )}
         <div className="overflow-x-auto">
@@ -347,10 +347,10 @@ export default function Leaderboard() {
           <>
             {/* Podium */}
             {top3.length === 3 && (
-              <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto mb-4">
-                <PodiumCard entry={top3[1]} height="h-36" delay={100} color="bg-slate-400" />
-                <PodiumCard entry={top3[0]} height="h-44" delay={0} color="bg-amber-400" />
-                <PodiumCard entry={top3[2]} height="h-32" delay={200} color="bg-orange-400" />
+              <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto mb-4">
+                <PodiumCard entry={top3[1]} height="h-40" delay={100} color="bg-slate-400" />
+                <PodiumCard entry={top3[0]} height="h-48" delay={0} color="bg-amber-400" />
+                <PodiumCard entry={top3[2]} height="h-40" delay={200} color="bg-orange-400" />
               </div>
             )}
 

@@ -7,6 +7,4 @@ __pycache__/
 *.log
 server/data/
 server/models/
-Tree_AI_Backend/models/
-*.pt
 temp_*.py

@@ -2,15 +2,18 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Bot, X, Send, Sparkles, User, Loader2, HelpCircle } from 'lucide-react';
 import { getCurrentScene } from '../utils/sceneStore';
 import { askAdvisor, extractError } from '../api/api';
-import { buildAdvisorContext, advisorGreeting, advisorPrompts } from '../utils/advisor';
+import { buildAdvisorContext, advisorGreeting } from '../utils/advisor';
 import { useMode } from '../context/useMode';
-import { MODES } from '../context/mode';
 
-const MODE_LABEL = {
-  [MODES.MUNICIPAL]: 'Municipal',
-  [MODES.INDUSTRIAL]: 'Industrial',
-  [MODES.CITIZEN]: 'Citizen',
-};
+const SUGGESTED_PROMPTS = [
+  'Which tree should I plant here?',
+  'Why is this species suitable?',
+  'Which tree needs less water?',
+  'What should my city plant?',
+  'How much would planting 500 trees cost?',
+  'How can we reach the 60% target?',
+  'Explain this analysis',
+];
 
 export default function ClimateGPTWidget() {
   const { mode } = useMode();
@@ -23,11 +26,6 @@ export default function ClimateGPTWidget() {
   const messagesEndRef = useRef(null);
 
   const scene = useMemo(() => getCurrentScene(), []);
-
-  const prompts = useMemo(
-    () => advisorPrompts(scene, mode).filter((p) => typeof p === 'string' && p.trim().length > 0),
-    [scene, mode],
-  );
 
   // Build a short context line so the user knows what the advisor sees
   const contextLine = useMemo(() => {
@@ -87,11 +85,11 @@ export default function ClimateGPTWidget() {
                 <Bot size={18} />
               </div>
               <div>
-                <h4 className="font-display font-bold text-sm text-mist light:text-ink flex items-center gap-1.5">
-                  ClimateGPT <Sparkles size={12} className="text-canopy" />
+                <h4 className="font-display font-bold text-sm text-mist light:text-ink flex items-center gap-1.5 uppercase tracking-wide">
+                  GREENVISION AI ADVISOR <Sparkles size={12} className="text-canopy" />
                 </h4>
                 <span className="text-[10px] font-mono text-mist-dim light:text-ink/50">
-                  {MODE_LABEL[mode] || 'Municipal'} advisor · {scene?.scene_type ? 'scene analysed' : 'no scene yet'}
+                  Ask me about trees, planting, your environment, or this analysis.
                 </span>
               </div>
             </div>
@@ -110,24 +108,6 @@ export default function ClimateGPTWidget() {
               <HelpCircle size={10} className="text-canopy shrink-0" /> {contextLine}
             </p>
           </div>
-
-          {/* Suggested Questions */}
-          {prompts.length > 0 && (
-            <div className="p-3 border-b border-white/5 light:border-black/5 bg-white/5 light:bg-black/5">
-              <p className="text-[9px] font-mono text-mist-dim/50 light:text-ink/30 uppercase tracking-widest mb-2">Suggested questions</p>
-              <div className="flex flex-wrap gap-1.5">
-                {prompts.map((p, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSend(p)}
-                    className="bg-white/5 light:bg-white border border-white/10 light:border-black/10 text-mist-dim light:text-ink/70 px-2.5 py-1 rounded-full hover:border-canopy hover:text-canopy transition-colors text-[11px] font-mono"
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Messages Container */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3 font-body text-xs">
@@ -156,6 +136,21 @@ export default function ClimateGPTWidget() {
               </div>
             )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Suggested Prompts */}
+          <div className="px-3 py-2.5 border-t border-white/5 light:border-black/5">
+            <div className="flex flex-wrap gap-1.5">
+              {SUGGESTED_PROMPTS.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => setInput(p)}
+                  className="bg-canopy/10 text-canopy border border-canopy/20 px-2.5 py-1 rounded-full hover:bg-canopy/20 transition-colors text-[11px] font-medium whitespace-nowrap"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Input Box */}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UploadCard from '../components/UploadCard';
 import LocationInput from '../components/LocationInput';
-import { Sparkles, CheckCircle2, ArrowRight, Info, MapPin } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight, Info, MapPin, Loader2 } from 'lucide-react';
 import { setUserLocation } from '../utils/locationStore';
 
 function formatBytes(bytes) {
@@ -27,6 +27,30 @@ export default function Upload() {
     navigate('/processing', { state: { file, location } });
   };
 
+  const [loadingSample, setLoadingSample] = useState(false);
+
+  const handleSampleScene = async () => {
+    if (loadingSample) return;
+    setLoadingSample(true);
+    try {
+      const res = await fetch('/sample-scene.jpg');
+      const blob = await res.blob();
+      const sampleFile = new File([blob], 'sample_scene_low_canopy.jpg', { type: 'image/jpeg' });
+      const defaultLocation = location || {
+        lat: 12.9716,
+        lng: 77.5946,
+        name: 'Bengaluru',
+        provenance: 'sample-default',
+      };
+      setFile(sampleFile);
+      setLocation(defaultLocation);
+      setUserLocation(defaultLocation);
+      navigate('/processing', { state: { file: sampleFile, location: defaultLocation } });
+    } catch {
+      setLoadingSample(false);
+    }
+  };
+
   return (
     <div className="w-full flex-1 flex flex-col justify-center">
       <div className="max-w-4xl w-full mx-auto px-6 py-12 md:py-16 space-y-8">
@@ -43,6 +67,14 @@ export default function Upload() {
             Upload raw satellite imagery or drone orthomosaics. The AI engine classifies the scene,
             measures canopy cover, estimates tree counts, and computes carbon &amp; oxygen.
           </p>
+          <button
+            onClick={handleSampleScene}
+            disabled={loadingSample}
+            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-canopy to-leaf hover:opacity-90 active:scale-[0.99] disabled:opacity-60 px-4 py-2.5 rounded-xl shadow-lg shadow-canopy/20"
+          >
+            {loadingSample ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+            {loadingSample ? 'Loading sample scene…' : 'Try a sample scene →'}
+          </button>
         </div>
 
         {/* File Picker & Inspect */}

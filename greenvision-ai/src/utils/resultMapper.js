@@ -191,6 +191,8 @@ export function mapReportToScene(report) {
     targetGreenCover: TARGET_GREEN_COVER,
     carbon,
     oxygen,
+    carbonOffset: carbon,
+    oxygenProduction: oxygen,
     heatIndex: null, // not produced by the backend model
     aqi: null, // not produced by the backend model
     forestAreaHectares: areaHa,

@@ -1,0 +1,14 @@
+server/venv/
+server/data/
+server/models/
+server/uploads/
+server/reports/
+server/boot_*.log
+*.log
+__pycache__/
+*.pyc
+greenvision-ai/node_modules/
+greenvision-ai/dist/
+.env
+**/.env
+temp_*.py

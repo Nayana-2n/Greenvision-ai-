@@ -15,6 +15,7 @@ import ProgressRing from '../components/ProgressRing';
 import ClimateGPTWidget from '../components/ClimateGPTWidget';
 import EnvironmentalContext from '../components/EnvironmentalContext';
 import HeatmapOverlay from '../components/HeatmapOverlay';
+import ImpactSimulator from '../components/ImpactSimulator';
 import CitizenArea from '../components/CitizenArea';
 import { getCurrentScene } from '../utils/sceneStore';
 import { getUserLocation } from '../utils/locationStore';
@@ -136,6 +137,10 @@ function MunicipalDashboard({ r }) {
             <StatsCard icon={MapPin} label="Area" value={r.forestAreaHectares != null ? `${r.forestAreaHectares} ha` : 'N/A'} trend={r.totalAreaHectares ? `of ${r.totalAreaHectares} ha total` : undefined} accent="text-earth" accentBg="bg-earth/10" />
           </div>
 
+          <div className="mb-8">
+            <ImpactSimulator scene={r} />
+          </div>
+
           <HeatmapOverlay heatmapUrl={r.heatmapUrl} />
 
           {r.gps && (
@@ -183,6 +188,31 @@ function MunicipalDashboard({ r }) {
           </div>
 
           <EnvironmentalContext scene={r} location={r.userLocation ?? r.gps} />
+
+          {/* Decision Summary */}
+          <div className="mt-8 bg-gradient-to-br from-canopy/10 via-panel to-panel light:from-canopy/5 light:via-white light:to-white border border-canopy/20 rounded-3xl p-6 shadow-lg">
+            <p className="text-[10px] font-mono text-canopy font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <FileText size={13} /> DECISION SUMMARY
+            </p>
+            <div className="grid md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Current status</p>
+                <p className="text-xs text-mist light:text-ink font-semibold">{r.greenCover != null ? `${r.greenCover}% canopy cover` : 'Awaiting measurement'}</p>
+                {gap && <p className="text-[10px] text-mist-dim light:text-ink/60 mt-0.5">Gap: {gap.trees_needed.toLocaleString()} trees to {gap.target_green_cover}%</p>}
+              </div>
+              <div>
+                <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Annual carbon offset</p>
+                <p className="text-xs text-mist light:text-ink font-semibold">{r.carbonOffset != null ? `${r.carbonOffset} t CO₂/yr` : 'Not modeled'}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Priority</p>
+                <p className="text-xs text-mist light:text-ink font-semibold">{r.plantation_priority ?? 'Unknown'}</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-mist-dim light:text-ink/50 leading-relaxed">
+              Use the simulator above to explore planting scenarios. All figures are transparent planning estimates — not regulatory guarantees.
+            </p>
+          </div>
 
           {r.methodologyNotes && (
             <div className="mt-8 bg-white/5 light:bg-white border border-white/10 light:border-black/10 rounded-2xl p-5 shadow-sm">
@@ -344,6 +374,10 @@ function IndustrialSite({ r }) {
             <StatsCard icon={MapPin} label="Site Area" value={r.forestAreaHectares != null ? `${r.forestAreaHectares} ha` : 'N/A'} trend={r.totalAreaHectares ? `of ${r.totalAreaHectares} ha total` : undefined} accent="text-earth" accentBg="bg-earth/10" />
           </div>
 
+          <div className="mb-8">
+            <ImpactSimulator scene={r} />
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-6 mb-8">
             <div className="h-full">
               <MapView scene={r} />
@@ -416,6 +450,31 @@ function IndustrialSite({ r }) {
             <Link to="/planting" className="mt-4 flex items-center justify-center gap-2 bg-databue text-white text-xs font-mono font-semibold px-5 py-2.5 rounded-full hover:scale-105 transition-transform shadow-lg shadow-databue/20">
               <Sprout size={14} /> Develop Green Buffer Plan <ArrowRight size={13} />
             </Link>
+          </div>
+
+          {/* Industrial Decision Summary */}
+          <div className="mt-8 bg-gradient-to-br from-databue/10 via-panel to-panel light:from-databue/5 light:via-white light:to-white border border-databue/20 rounded-3xl p-6 shadow-lg">
+            <p className="text-[10px] font-mono text-databue font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Factory size={13} /> EXECUTIVE DECISION SUMMARY
+            </p>
+            <div className="grid md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Compliance status</p>
+                <p className="text-xs text-mist light:text-ink font-semibold">{complianceStatus ? complianceLabel[complianceStatus] : 'Awaiting measurement'}</p>
+                {gap && <p className="text-[10px] text-mist-dim light:text-ink/60 mt-0.5">Buffer gap: {gap.trees_needed.toLocaleString()} trees to {gap.target_green_cover}%</p>}
+              </div>
+              <div>
+                <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Carbon credit potential</p>
+                <p className="text-xs text-mist light:text-ink font-semibold">{r.carbonOffset != null ? `~${r.carbonOffset} t CO₂/yr` : 'Not modeled'}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Investment range</p>
+                <p className="text-xs text-mist light:text-ink font-semibold">Use simulator above for estimates</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-mist-dim light:text-ink/50 leading-relaxed">
+              Use the impact simulator above to explore green buffer scenarios. All figures are planning estimates — not regulatory guarantees.
+            </p>
           </div>
 
           {/* Honesty disclaimer */}
