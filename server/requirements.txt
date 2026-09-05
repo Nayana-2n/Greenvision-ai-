@@ -1,7 +1,11 @@
 flask==3.0.3
 flask-cors==4.0.1
 gunicorn==22.0.0
-numpy>=1.23.0
+numpy==1.26.4
 opencv-python>=4.8.0
 pillow>=10.0.0
-ultralytics>=8.0.0
+ultralytics==8.4.118
+
+# PyTorch is installed separately (CPU-only build), e.g.:
+#   pip install torch==2.2.2+cpu torchvision==0.17.2+cpu \
+#     --index-url https://download.pytorch.org/whl/cpu
