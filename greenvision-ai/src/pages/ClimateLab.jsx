@@ -156,6 +156,11 @@ export default function ClimateLab() {
                       + {scene.detected_trees.toLocaleString()} trunks detected (street detector)
                     </span>
                   )}
+                  {Array.isArray(scene?.species) && scene.species.length > 0 && (
+                    <span className="text-[10px] font-mono text-mist-dim light:text-ink/40 block mt-1">
+                      Species: {scene.species.map((s) => s.species).join(', ')}
+                    </span>
+                  )}
                 </div>
                 <div className="bg-white/5 light:bg-black/5 border border-white/8 light:border-black/8 rounded-2xl p-4">
                   <span className="text-[11px] font-mono text-mist-dim light:text-ink/50 uppercase">Plantation priority</span>

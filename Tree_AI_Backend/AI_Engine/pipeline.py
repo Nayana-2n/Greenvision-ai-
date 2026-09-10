@@ -23,6 +23,7 @@ import os
 
 from router import SceneRouter
 from inference import InferenceEngine
+from estimators.species import predict_species
 
 from config import (
     SCENE_CLASSIFIER,
@@ -202,6 +203,26 @@ class TreeAIPipeline:
                     sum(confs) / len(confs),
                     3
                 )
+
+            # -------------------------------------------------
+            # 5c. Species classification from detected trunks
+            # -------------------------------------------------
+
+            if boxes is not None and len(boxes) > 0:
+
+                import cv2
+
+                image_bgr = cv2.imread(image_path)
+
+                box_xyxy = boxes.xyxy.cpu().numpy()
+
+                report["species"] = predict_species(
+                    image_bgr, box_xyxy
+                )
+
+            else:
+
+                report["species"] = []
 
         # -----------------------------------------------------
         # 6. Add common pipeline information

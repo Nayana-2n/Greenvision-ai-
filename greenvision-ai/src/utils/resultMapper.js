@@ -209,6 +209,9 @@ export function mapReportToScene(report) {
     treeDetectionMethod: report.tree_detection_method ?? null,
     treeDetectionConfidence: detectionConf,
 
+    // Per-trunk species classification (street scenes only).
+    species: report.species ?? null,
+
     // ML confidence badges — honest mapping:
     //  - sceneClassification : scene classifier top-1 confidence
     //  - density             : canopy-density classifier confidence

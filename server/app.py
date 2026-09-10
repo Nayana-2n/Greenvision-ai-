@@ -418,6 +418,8 @@ def analyze():
     except ValueError as exc:
         return _error(f"Invalid image for analysis: {exc}", 422)
     except RuntimeError as exc:
+        import traceback
+        logger.exception("Model inference runtime error: %s\n%s", exc, traceback.format_exc())
         return _error(f"Model inference error: {exc}", 500)
     except Exception as exc:
         logger.exception("Analysis pipeline failed")
