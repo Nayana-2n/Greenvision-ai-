@@ -137,6 +137,38 @@ function MunicipalDashboard({ r }) {
             <StatsCard icon={MapPin} label="Area" value={r.forestAreaHectares != null ? `${r.forestAreaHectares} ha` : 'N/A'} trend={r.totalAreaHectares ? `of ${r.totalAreaHectares} ha total` : undefined} accent="text-earth" accentBg="bg-earth/10" />
           </div>
 
+          {/* Tree species — trunk-level identification (street scenes only) */}
+          {(r.species != null || r.detectedTrees != null) && (
+            <div className="mb-8 bg-white/5 light:bg-white border border-white/10 light:border-black/10 rounded-2xl p-5 shadow-sm">
+              <p className="text-[10px] font-mono text-canopy font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <TreePine size={13} /> TREE SPECIES
+              </p>
+              {Array.isArray(r.species) && r.species.length > 0 ? (
+                <>
+                  <p className="text-[11px] font-mono text-mist-dim light:text-ink/50 mb-2">
+                    {r.detectedTrees} trunk{r.detectedTrees === 1 ? '' : 's'} detected &middot; {r.treeDetectionMethod || 'trunk detector'} &middot; per-tree confidence shown
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {r.species.map((s, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 bg-canopy/10 text-canopy border border-canopy/25 rounded-full px-3 py-1 text-[11px] font-mono">
+                        <TreePine size={12} /> {s.species}
+                        {s.confidence != null && (
+                          <span className="text-mist-dim light:text-ink/50">· {Math.round(s.confidence * 100)}%</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-mist-dim light:text-ink/60 leading-relaxed">
+                  {r.detectedTrees === 0
+                    ? 'No tree trunks were detected in this image, so no species could be identified. Upload a street-level photo where individual trunks are clearly visible to identify species.'
+                    : 'This image type (aerial / drone view) does not run the trunk–species analysis. Upload a street-level photo of trees to identify their species.'}
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="mb-8">
             <ImpactSimulator scene={r} />
           </div>

@@ -21,8 +21,11 @@ The species classifier only runs on **street scenes** (photo taken at ground lev
 
 | File | What it demonstrates | Verified result |
 |---|---|---|
-| `species_scots_pine.jpg` | Single isolated Scots pine at ground level | **street** scene, **2 trunks** detected → `Coniferous Tree` (0.62, 0.79) |
 | `species_old_growth_forest.jpg` | Multi-trunk forest photo — species for every detected tree | **street** scene, **7 trunks** detected → `Coniferous Tree` (0.51–0.999) |
+| `species_scots_pine.jpg` | Single isolated Scots pine at ground level | **street** scene, **2 trunks** detected → `Coniferous Tree` (0.62, 0.79) |
+| `species_scots_pine_grove.jpg` | Mixed-species street scene — different species in one photo | **street** scene, **7 trunks** → `Deciduous Tree` (×6) + `Pine` (0.48) |
+| `species_pine_reserve.jpg` | Pine forest reserve — best *specific* Pine example | **street** scene, **2 trunks** → `Pine` (0.96) + `Deciduous Tree` (0.95) |
+| `species_silver_birch_grove.jpg` | Birch grove — produces a *specific* conifer label | **street** scene, **2 trunks** → `Coniferous Tree` (0.71) + `Spruce` (0.83) |
 | `species_single_oak.jpg` | Single deciduous tree | **street** scene, **1 trunk** detected → `Deciduous Tree` (0.96) |
 | `species_yellow_birch.jpg` | Real birch trunk photo — honest model behaviour | **street** scene, **2 trunks** detected → `Coniferous Tree` (0.998). The species model is not perfect: it reads this birch as coniferous, so report confidences alongside species. |
 

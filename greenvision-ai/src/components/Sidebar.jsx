@@ -1,29 +1,18 @@
-import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, Thermometer, Sprout, Bot, FileText, Upload, Factory } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useMode } from '../context/useMode';
 import { MODES } from '../context/mode';
-
-const MUNICIPAL_LINKS = [
-  { to: '/dashboard', label: 'Command Center', icon: LayoutDashboard },
-  { to: '/climate-lab', label: 'Climate Lab', icon: Thermometer },
-  { to: '/planting', label: 'Planting Plan', icon: Sprout },
-  { to: '/advisor', label: 'AI Advisor', icon: Bot },
-  { to: '/reports', label: 'Reports', icon: FileText },
-];
-
-const INDUSTRIAL_LINKS = [
-  { to: '/dashboard', label: 'Site Overview', icon: LayoutDashboard },
-  { to: '/upload', label: 'Site Analysis', icon: Upload },
-  { to: '/planting', label: 'Green Buffer Plan', icon: Factory },
-  { to: '/climate-lab', label: 'Investment & Impact', icon: Thermometer },
-  { to: '/reports', label: 'Report', icon: FileText },
-];
+import { MUNICIPAL_LINKS, INDUSTRIAL_LINKS, CITIZEN_LINKS } from '../utils/navLinks';
 
 export default function Sidebar({ sceneId }) {
   const { mode } = useMode();
-  const isIndustrial = mode === MODES.INDUSTRIAL;
-  const navLinks = isIndustrial ? INDUSTRIAL_LINKS : MUNICIPAL_LINKS;
+  const navLinks =
+    mode === MODES.INDUSTRIAL
+      ? INDUSTRIAL_LINKS
+      : mode === MODES.CITIZEN
+      ? CITIZEN_LINKS
+      : MUNICIPAL_LINKS;
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
 

@@ -4,28 +4,7 @@ import { Satellite, Menu, X, Sun, Moon, Building2, Factory, User } from 'lucide-
 import useTheme from '../hooks/useTheme';
 import { useMode } from '../context/useMode';
 import { MODES } from '../context/mode';
-
-const MUNICIPAL_LINKS = [
-  { to: '/upload', label: 'Analyze' },
-  { to: '/dashboard', label: 'Diagnosis' },
-  { to: '/planting', label: 'Plan' },
-  { to: '/temporal', label: 'Historical' },
-  { to: '/reports', label: 'Reports' },
-];
-
-const INDUSTRIAL_LINKS = [
-  { to: '/upload', label: 'Site Analysis' },
-  { to: '/dashboard', label: 'Green Buffer' },
-  { to: '/planting', label: 'Species' },
-  { to: '/reports', label: 'Report' },
-];
-
-const CITIZEN_LINKS = [
-  { to: '/dashboard', label: 'My Area' },
-  { to: '/planting', label: 'Ask GreenVision' },
-  { to: '/contribute', label: 'Contribute' },
-  { to: '/leaderboard', label: 'Champions' },
-];
+import { MUNICIPAL_LINKS, INDUSTRIAL_LINKS, CITIZEN_LINKS } from '../utils/navLinks';
 
 const MODE_META = {
   [MODES.MUNICIPAL]: { icon: Building2, label: 'Municipal', navLinks: MUNICIPAL_LINKS },
