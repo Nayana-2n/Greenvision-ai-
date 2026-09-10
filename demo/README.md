@@ -15,6 +15,19 @@ Scene label vs density class: the scene classifier labels the aerial-vegetation 
 
 The low-canopy figure is **measured, not hard-coded** — the previous demo brief listed a placeholder "8.2% canopy / 988 trees / HIGH priority" that was never produced by the model. The current row is the actual live output of the pipeline on `demo/low_canopy_urban_aerial.jpg` (regenerate with `python generate_demo_assets.py`, re-analyze, and re-verify if the models change).
 
+## Species classifier demo images
+
+The species classifier only runs on **street scenes** (photo taken at ground level) where the trunk detector finds visible tree trunks. Each detected trunk is then classified by the DeepForest species model into Birch / Coniferous Tree / Deciduous Tree / Pine / Spruce / pinus spp. All values below are the live backend output (scene classifier + `street.pt` trunk detector + species `CropModel`).
+
+| File | What it demonstrates | Verified result |
+|---|---|---|
+| `species_scots_pine.jpg` | Single isolated Scots pine at ground level | **street** scene, **2 trunks** detected → `Coniferous Tree` (0.62, 0.79) |
+| `species_old_growth_forest.jpg` | Multi-trunk forest photo — species for every detected tree | **street** scene, **7 trunks** detected → `Coniferous Tree` (0.51–0.999) |
+| `species_single_oak.jpg` | Single deciduous tree | **street** scene, **1 trunk** detected → `Deciduous Tree` (0.96) |
+| `species_yellow_birch.jpg` | Real birch trunk photo — honest model behaviour | **street** scene, **2 trunks** detected → `Coniferous Tree` (0.998). The species model is not perfect: it reads this birch as coniferous, so report confidences alongside species. |
+
+Graceful-failure cases (expected — keep these honest in demos): an aerial park image like `bengaluru_cubbon_park.jpg` returns no trunks (`detected_trees: null`, `species: []`); a fuzzy/distant "fir tree" photo was classified `sparse` with no trunks. Species output requires a crisp ground-level view of the trunk.
+
 ---
 
 ## 1. Start the app
@@ -46,8 +59,9 @@ Open `http://localhost:5173`.
    - Dashboard shows ~8% canopy, **Sparse** density, **High** plantation priority and a large planting gap to the 60% target — a real low-canopy reading, not a canned demo number.
    - The reliability gate passes (the scene is a real colour aerial), so the full planting-plan flow works.
 5. **Climate Lab** — move the trees slider → numbers change live (real estimator math via backend).
-6. **ClimateGPT / Advisor** — ask *"How many trees are estimated?"* and *"What is the plantation recommendation?"*.
-7. **Reports** — open the saved report; print/download; show the **Methodology & Assumptions** section.
+6. **Species classifier (new)** — upload `species_old_growth_forest.jpg` (or `species_single_oak.jpg`) → the trunk detector counts the trees and the species model labels each one. Open **Climate Lab** → the "Estimated trees" card shows `Species: Coniferous Tree, Coniferous Tree, …` per detected trunk.
+7. **ClimateGPT / Advisor** — ask *"How many trees are estimated?"* and *"What is the plantation recommendation?"*.
+8. **Reports** — open the saved report; print/download; show the **Methodology & Assumptions** section.
 
 ## 3. Honest answers to likely questions
 
