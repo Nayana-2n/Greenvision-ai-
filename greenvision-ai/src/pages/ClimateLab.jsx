@@ -72,12 +72,18 @@ export default function ClimateLab() {
   const basePriority = baseline?.plantation_priority ?? null;
 
   // Target attainment after this intervention (vs the 60% canopy target).
+  // Target-anchored claims are suppressed when the baseline is low-reliability
+  // (vegetation_warning set): a street/urban scene's canopy may be
+  // over-detected, so "target met" must not be asserted on uncertain numbers.
+  const targetAssessed = !(baseline?.vegetation_warning);
   const targetAttainment =
-    gap && projectedCanopy != null
+    gap && targetAssessed && projectedCanopy != null
       ? Math.min(100, (projectedCanopy / gap.target_green_cover) * 100)
       : null;
   const remainingToTarget =
-    gap != null ? Math.max(0, gap.trees_needed - treeCount) : null;
+    gap != null && targetAssessed
+      ? Math.max(0, gap.trees_needed - treeCount)
+      : null;
 
   // Current vs after-planting comparison (scene-aware).
   const currentCarbon = scene?.carbon_tonnes_per_year ?? scene?.carbon ?? null;
@@ -86,9 +92,11 @@ export default function ClimateLab() {
   const afterOxygen = sim?.projected?.oxygen_tonnes_per_year ?? null;
   const currentStatus =
     baseCanopy != null
-      ? baseCanopy >= gap?.target_green_cover
-        ? 'At target'
-        : 'Below target'
+      ? targetAssessed
+        ? baseCanopy >= gap?.target_green_cover
+          ? 'At target'
+          : 'Below target'
+        : 'Not assessed'
       : null;
   const afterStatus =
     remainingToTarget != null
@@ -164,7 +172,7 @@ export default function ClimateLab() {
                 </div>
                 <div className="bg-white/5 light:bg-black/5 border border-white/8 light:border-black/8 rounded-2xl p-4">
                   <span className="text-[11px] font-mono text-mist-dim light:text-ink/50 uppercase">Plantation priority</span>
-                  <p className={`font-display font-bold text-lg mt-1 ${basePriority === 'High' ? 'text-red-400' : basePriority === 'Medium' ? 'text-earth' : 'text-canopy'}`}>
+                  <p className={`font-display font-bold text-lg mt-1 ${basePriority === 'High' ? 'text-red-400' : basePriority === 'Medium' ? 'text-earth' : basePriority === 'Not Assessed' ? 'text-amber-400' : 'text-canopy'}`}>
                     {basePriority || '—'}
                   </p>
                 </div>
@@ -201,14 +209,23 @@ export default function ClimateLab() {
             </div>
           )}
 
-          {/* Target gap (measured scene) */}
-          {gap && (
+          {/* Target gap (measured scene) — suppressed for low-reliability baselines */}
+          {gap && targetAssessed && (
             <div className="mt-3 bg-white/5 light:bg-black/5 border border-white/8 light:border-black/8 rounded-2xl p-4 text-xs font-mono text-mist-dim light:text-ink/60 leading-relaxed">
               <span className="text-mist light:text-ink font-semibold">
                 {gap.current_green_cover}% canopy → {gap.target_green_cover}% target.
               </span>{' '}
               About <span className="text-mist light:text-ink font-bold">{gap.trees_needed.toLocaleString()}</span> additional trees are
               estimated to close the gap (same arithmetic as the Planting Plan; assumes canopy density is maintained).
+            </div>
+          )}
+          {baseline && !targetAssessed && gap && (
+            <div className="mt-3 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
+              <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-200/90 light:text-amber-700 leading-relaxed">
+                <span className="font-bold">Target gap not assessed.</span> The {gap.current_green_cover}% canopy is
+                indicative-only for this street/urban scene, so a confident gap to the 60% target cannot be computed.
+              </p>
             </div>
           )}
         </div>
@@ -338,7 +355,7 @@ export default function ClimateLab() {
               <p className="font-display font-bold text-2xl text-mist-dim light:text-ink/40 mt-1">—</p>
             )}
             <span className="text-[10px] font-mono text-mist-dim light:text-ink/40">
-              {gap ? `of ${gap.target_green_cover}% target after planting` : 'needs a measured baseline scene'}
+              {gap ? (targetAssessed ? `of ${gap.target_green_cover}% target after planting` : 'of 60% target — not assessed (uncertain canopy)') : 'needs a measured baseline scene'}
             </span>
           </div>
 
@@ -358,7 +375,7 @@ export default function ClimateLab() {
               <p className="font-display font-bold text-2xl text-mist-dim light:text-ink/40 mt-1">—</p>
             )}
             <span className="text-[10px] font-mono text-mist-dim light:text-ink/40">
-              {gap ? `trees still needed after planting ${treeCount.toLocaleString()}` : 'needs a measured baseline scene'}
+              {gap ? (targetAssessed ? `trees still needed after planting ${treeCount.toLocaleString()}` : 'gap not assessed for this scene') : 'needs a measured baseline scene'}
             </span>
           </div>
         </div>
@@ -404,7 +421,7 @@ export default function ClimateLab() {
               {[
                 ['Trees', baseTrees != null ? baseTrees.toLocaleString() : '—', projectedTrees != null ? projectedTrees.toLocaleString() : '—'],
                 ['Canopy cover', baseCanopy != null ? `${baseCanopy}%` : '—', canopyModeled && projectedCanopy != null ? `${projectedCanopy}%` : '—'],
-                ['Gap to 60% target', gap ? `${gap.trees_needed.toLocaleString()} trees` : '—', remainingToTarget != null ? (remainingToTarget > 0 ? `${remainingToTarget.toLocaleString()} trees left` : 'Closed') : '—'],
+                ['Gap to 60% target', gap ? (targetAssessed ? `${gap.trees_needed.toLocaleString()} trees` : 'Not assessed') : '—', remainingToTarget != null ? (remainingToTarget > 0 ? `${remainingToTarget.toLocaleString()} trees left` : 'Closed') : '—'],
                 ['CO₂ / year', currentCarbon != null ? `${currentCarbon} t` : '—', afterCarbon != null ? `${afterCarbon} t` : '—'],
                 ['O₂ / year', currentOxygen != null ? `${currentOxygen} t` : '—', afterOxygen != null ? `${afterOxygen} t` : '—'],
                 ['Target status', currentStatus ?? '—', afterStatus ?? '—'],

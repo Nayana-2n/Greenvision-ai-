@@ -1177,6 +1177,49 @@ def advisor_reply(message: str, context: dict) -> tuple:
             "density",
         )
 
+    # ------------------------------------------------------------------
+    # Species-planting intent: "can I plant neem" / "should I plant pine" /
+    # "is neem good to plant here" / "what about planting banyan".
+    # Must run BEFORE the generic plantation fallback below, which would
+    # otherwise match any message containing the word "plant" and answer
+    # "Plantation priority: ..." even for species-planting questions.
+    # ------------------------------------------------------------------
+    species_plant_q = re.search(
+        r"\b(can i|can we|should i|should we|is it (good|ok|fine|suitable|"
+        r"advised|recommended)|is\b[^.!?\n]{0,40}\b(good|better|best|fine|"
+        r"suitable|ok|advisable|workable|ideal)\b|recommend (planting|growing)|"
+        r"want(ed)? to (plant|grow)|thinking? of|what about|how about|"
+        r"easy to (plant|grow)|right (tree|species) to|good (tree|species) to)\b",
+        q,
+    )
+    if species_plant_q:
+        named_species = None
+        for s in SPECIES:
+            if (
+                s["common_name"].lower() in q
+                or s["id"].lower() in q
+                or s["scientific_name"].lower() in q
+            ):
+                named_species = s
+                break
+        if named_species:
+            goal = "pollution" if mode == "industrial" else "shade"
+            sp_score, reasons = score_species(named_species, plant_ctx, goal)
+            suitability = max(0, min(100, round(sp_score / MAX_RULE_SCORE * 100)))
+            loc_clause = f" in {_loc_name}" if _loc_name else ""
+            return (
+                f"{named_species['common_name']} ({named_species['scientific_name']}) is "
+                f"{'a good' if suitability >= 60 else 'a moderate' if suitability >= 40 else 'a less ideal'} "
+                f"choice{loc_clause}. "
+                f"GreenVision suitability: {suitability}/100. "
+                f"Key factors: {'; '.join(reasons[:3]) or 'baseline score'}. "
+                f"Water: {named_species['water_requirement']}, "
+                f"Sun: {named_species['sun_requirement']}, "
+                f"Spacing: {named_species['spacing_m']} m. "
+                f"Note: this is a planning heuristic — verify with local horticultural guidance.",
+                "species_eval",
+            )
+
     if re.search(r"\b(plant|recommend|priority|what should|action)\b", q):
         if not rec:
             return "No plantation recommendation is available for this scene.", "plantation"
@@ -1306,14 +1349,19 @@ def advisor_reply(message: str, context: dict) -> tuple:
                 f"Note: this is a planning heuristic — verify with local horticultural guidance.",
                 "species_eval",
             )
-        # Not a known species — natural response
-        return (
-            f"I don't have specific data on '{potential_name}' in the GreenVision species database, "
-            f"so I can't score it with confidence. I'd recommend checking with your local "
-            f"forestry department or nursery for species suited to your area{_loc_hint}. "
-            f"I can show you what the species engine ranks highly if you'd like.",
-            "species_unknown",
-        )
+        # Not a known species — but generic tree/plant wording ("can i plant
+        # trees?") should fall through to the plantation handler below rather
+        # than being treated as an unknown species name.
+        if re.fullmatch(r"(trees?|plants?|saplings?|more|some|several|anything|any)", potential_name):
+            can_plant_match = None
+        elif potential_name:
+            return (
+                f"I don't have specific data on '{potential_name}' in the GreenVision species database, "
+                f"so I can't score it with confidence. I'd recommend checking with your local "
+                f"forestry department or nursery for species suited to your area{_loc_hint}. "
+                f"I can show you what the species engine ranks highly if you'd like.",
+                "species_unknown",
+            )
 
     # ------------------------------------------------------------------
     # Follow-up: "what about 200" / "how about 500" (cost follow-up after
