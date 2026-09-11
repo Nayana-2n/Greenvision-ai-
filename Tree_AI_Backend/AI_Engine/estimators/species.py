@@ -77,7 +77,8 @@ def predict_species(image, boxes):
 
         results.append({
             "species": _IDX_TO_LABEL[int(class_id)],
-            "confidence": round(float(confidence), 4)
+            "confidence": round(float(confidence), 4),
+            "box": [x1, y1, x2, y2],
         })
 
     return results

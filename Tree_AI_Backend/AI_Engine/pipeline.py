@@ -40,6 +40,70 @@ from pipelines import vegetation_pipeline
 from estimators.reliability import assess_image_reliability
 
 
+def compute_species_coverage(species_entries, image):
+    """Species coverage from measured detection geometry.
+
+    Coverage is the area actually occupied by each detected species'
+    bounding boxes as a fraction of the whole image:
+
+        species_coverage_percentage =
+            (sum of box areas for that species / image area) * 100
+
+    It is deliberately independent of the species classifier confidence —
+    confidence never becomes coverage.
+    """
+    height, width = image.shape[:2]
+    image_area = width * height
+
+    if not species_entries or not image_area:
+        return []
+
+    per_species = {}
+
+    for entry in species_entries:
+
+        label = entry.get("species")
+        if label is None:
+            continue
+
+        box = entry.get("box")
+        if not box or len(box) != 4:
+            continue
+
+        x1, y1, x2, y2 = box
+        box_area = max(0, x2 - x1) * max(0, y2 - y1)
+
+        item = per_species.setdefault(label, {
+            "species": label,
+            "area": 0.0,
+            "confidence_sum": 0.0,
+            "trunk_count": 0,
+        })
+
+        item["area"] += box_area
+        item["confidence_sum"] += entry.get("confidence") or 0.0
+        item["trunk_count"] += 1
+
+    result = []
+
+    for label, item in per_species.items():
+
+        result.append({
+            "species": label,
+            "coverage_percentage": round(
+                (item["area"] / image_area) * 100, 2
+            ),
+            "classification_confidence": round(
+                item["confidence_sum"] / item["trunk_count"], 4
+            ),
+            "trunk_count": item["trunk_count"],
+        })
+
+    result.sort(key=lambda r: r["coverage_percentage"], reverse=True)
+
+    return result
+
+
 class TreeAIPipeline:
 
     def __init__(self):
@@ -220,9 +284,15 @@ class TreeAIPipeline:
                     image_bgr, box_xyxy
                 )
 
+                report["species_coverage"] = compute_species_coverage(
+                    report["species"], image_bgr
+                )
+
             else:
 
                 report["species"] = []
+
+                report["species_coverage"] = []
 
         # -----------------------------------------------------
         # 6. Add common pipeline information

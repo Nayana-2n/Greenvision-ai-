@@ -19,6 +19,8 @@ The low-canopy figure is **measured, not hard-coded** — the previous demo brie
 
 The species classifier only runs on **street scenes** (photo taken at ground level) where the trunk detector finds visible tree trunks. Each detected trunk is then classified by the DeepForest species model into Birch / Coniferous Tree / Deciduous Tree / Pine / Spruce / pinus spp. All values below are the live backend output (scene classifier + `street.pt` trunk detector + species `CropModel`).
 
+The API now also returns per-species **coverage** — `species_coverage[]` with `coverage_percentage` (Σ trunk bounding-box area ÷ image area × 100), `classification_confidence` (mean classifier score, kept separate) and `trunk_count`. Coverage is measured geometry, never derived from confidence.
+
 | File | What it demonstrates | Verified result |
 |---|---|---|
 | `species_old_growth_forest.jpg` | Multi-trunk forest photo — species for every detected tree | **street** scene, **7 trunks** detected → `Coniferous Tree` (0.51–0.999) |

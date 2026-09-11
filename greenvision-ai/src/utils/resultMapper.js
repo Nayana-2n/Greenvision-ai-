@@ -212,6 +212,11 @@ export function mapReportToScene(report) {
     // Per-trunk species classification (street scenes only).
     species: report.species ?? null,
 
+    // Per-species COVERAGE from measured detection geometry
+    // (Σ trunk box area per species ÷ image area × 100), with the mean
+    // classifier confidence kept separate. Never derived from confidence.
+    speciesCoverage: report.species_coverage ?? null,
+
     // ML confidence badges — honest mapping:
     //  - sceneClassification : scene classifier top-1 confidence
     //  - density             : canopy-density classifier confidence

@@ -77,7 +77,7 @@ npm run dev        # lint: npm run lint (oxlint) · build: npm run build
 
 ## Demo images (verified end-to-end)
 
-Analyze any of these on the **Analyze** page, then open **Diagnosis** (Municipal) or **Site Buffer** (Industrial) — the TREE SPECIES card shows each trunk's species + confidence.
+Analyze any of these on the **Analyze** page, then open **Diagnosis** (Municipal) or **Site Buffer** (Industrial) — the TREE SPECIES card shows each trunk's species plus two **separate, never-conflated** metrics: **Coverage %** (measured trunk area ÷ image area, from the detector's bounding boxes) and **Confidence %** (the species classifier's per-trunk score). Coverage is computed from geometry, never approximated from confidence.
 
 | File | Verified result |
 |---|---|
