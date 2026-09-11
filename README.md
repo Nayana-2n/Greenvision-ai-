@@ -16,7 +16,7 @@ Upload **any** scene — a top-down aerial / satellite image OR a ground-level s
 | Green canopy cover %, forest area, density / fragmentation | Canopy segmentation model |
 | Estimated tree count | canopy area × density heuristic (**not** individual detection) |
 | **Measured** trunk count | YOLO tree-trunk detector (street scenes only) |
-| **Per-trunk tree species + confidence** | DeepForest CropModel on each detected trunk |
+| **Per-region tree species + confidence** | DeepForest CropModel — species on street trunks (trunk crops) and on aerial tree-crown regions (aerial crops from the canopy segmentation; never trunks for aerial scenes) |
 | CO₂ offset / O₂ production (t/yr) | fixed per-tree arithmetic (22 / 118 kg) |
 | Planting gap to 60% canopy target | transparent arithmetic |
 | Species shortlist + budget estimates | rule-based planting engine conditioned on live weather/soil/elevation |
@@ -77,7 +77,9 @@ npm run dev        # lint: npm run lint (oxlint) · build: npm run build
 
 ## Demo images (verified end-to-end)
 
-Analyze any of these on the **Analyze** page, then open **Diagnosis** (Municipal) or **Site Buffer** (Industrial) — the TREE SPECIES card shows each trunk's species plus two **separate, never-conflated** metrics: **Coverage %** (measured trunk area ÷ image area, from the detector's bounding boxes) and **Confidence %** (the species classifier's per-trunk score). Coverage is computed from geometry, never approximated from confidence.
+Analyze any of these on the **Analyze** page, then open **Diagnosis** (Municipal) or **Site Buffer** (Industrial) — the TREE SPECIES card shows each detected region's species plus two **separate, never-conflated** metrics: **Coverage %** (measured region area ÷ image area — exact crown area for aerial scenes, trunk box area for street scenes) and **Confidence %** (the species classifier's per-region score). Coverage is computed from geometry, never approximated from confidence.
+
+Aerial/drone images use the **tree-crown species path**: the trained canopy segmentation supplies tree-crown regions and each crown crop goes to the species classifier (the species model was trained on aerial crown crops, not street trunks). The street trunk detector is never run for `dense`/`sparse` scenes; a street-labelled image with meaningful measured canopy but zero trunks is treated as a mislabelled aerial and routed through the crown path.
 
 | File | Verified result |
 |---|---|
@@ -88,7 +90,7 @@ Analyze any of these on the **Analyze** page, then open **Diagnosis** (Municipal
 | `demo/species_old_growth_forest.jpg` | 7 trunks → Coniferous 0.51–0.999 |
 | `demo/species_scots_pine.jpg` | 2 trunks → Coniferous 0.62 / 0.79 |
 | `demo/species_yellow_birch.jpg` | 2 trunks → Coniferous 0.998 (honest miss — real birch read as coniferous; confidence makes the limitation visible) |
-| `demo/low_canopy_urban_aerial.jpg` | canonical aerial: 156 trees, ~7.9% canopy, species `[]` |
+| `demo/low_canopy_urban_aerial.jpg` | canonical aerial: 156 trees (estimated), ~7.9% canopy, **6 crown regions → Coniferous Tree 1.00**, coverage 7.94% |
 
 All species photos are public-domain Wikimedia Commons imagery. Full table + graceful-failure cases in `demo/README.md`.
 
@@ -119,6 +121,6 @@ GET  /api/reports (+ download) · GET /api/heatmaps/<file> · POST /api/compare 
 ## Honest limits (by design)
 
 - No temperature-reduction, AQI/pollution-reduction or biodiversity-impact numbers — those models do not exist in the backend, so the UI never shows dead "UNAVAILABLE" tiles.
-- `detected_trees` (measured trunk count) is never conflated with `estimated_trees` (area×density heuristic).
+- `detected_trees` (measured count: trunks for street scenes, tree-crown regions for aerial scenes) is never conflated with `estimated_trees` (area×density heuristic).
 - `models/dense/best.pt` is an untrained epoch-0 checkpoint and is **disabled**; `models/sparse/best.pt` (the trained canopy model) runs for every scene type.
 - Street scenes with measured canopy > 40% are flagged *indicative-only* because the canopy model can over-detect on roofs/roads/shadows.

@@ -17,9 +17,12 @@ The low-canopy figure is **measured, not hard-coded** — the previous demo brie
 
 ## Species classifier demo images
 
-The species classifier only runs on **street scenes** (photo taken at ground level) where the trunk detector finds visible tree trunks. Each detected trunk is then classified by the DeepForest species model into Birch / Coniferous Tree / Deciduous Tree / Pine / Spruce / pinus spp. All values below are the live backend output (scene classifier + `street.pt` trunk detector + species `CropModel`).
+The species model was trained on **aerial tree-CROWN crops** (64,861 crops from the forest-trees dataset), not on street trunks. The pipeline therefore runs **two distinct species paths**, chosen by routing (`analysis_view`):
 
-The API now also returns per-species **coverage** — `species_coverage[]` with `coverage_percentage` (Σ trunk bounding-box area ÷ image area × 100), `classification_confidence` (mean classifier score, kept separate) and `trunk_count`. Coverage is measured geometry, never derived from confidence.
+- **Street path** (`analysis_view: street`) — ground-level photos: the `street.pt` trunk detector finds trunks, each trunk is cropped and classified.
+- **Aerial path** (`analysis_view: aerial`) — aerial/drone imagery (scene `dense`/`sparse`): tree-crown regions are extracted from the trained canopy-segmentation output (connected crown regions) and each crown crop is classified. The street trunk detector is **never** run for `dense`/`sparse` scenes. If a street-labelled image shows meaningful measured canopy but zero trunks, it is treated as a mislabelled aerial and routed through the crown path (never presented as a trunk result).
+
+Each detected region — trunk or crown — is classified by the DeepForest species model into Birch / Coniferous Tree / Deciduous Tree / Pine / Spruce / pinus spp:
 
 | File | What it demonstrates | Verified result |
 |---|---|---|
@@ -31,7 +34,17 @@ The API now also returns per-species **coverage** — `species_coverage[]` with 
 | `species_single_oak.jpg` | Single deciduous tree | **street** scene, **1 trunk** detected → `Deciduous Tree` (0.96) |
 | `species_yellow_birch.jpg` | Real birch trunk photo — honest model behaviour | **street** scene, **2 trunks** detected → `Coniferous Tree` (0.998). The species model is not perfect: it reads this birch as coniferous, so report confidences alongside species. |
 
-Graceful-failure cases (expected — keep these honest in demos): an aerial park image like `bengaluru_cubbon_park.jpg` returns no trunks (`detected_trees: null`, `species: []`); a fuzzy/distant "fir tree" photo was classified `sparse` with no trunks. Species output requires a crisp ground-level view of the trunk.
+**Aerial species results (crown path)** — these are new since the routing fix:
+
+| Image | Routing | Verified result |
+|---|---|---|
+| `low_canopy_urban_aerial.jpg` | scene `street` (0.98) → **aerial override** (7.92% canopy, 0 trunks) | **6 crown regions** → all `Coniferous Tree` (1.00) · coverage **7.94**% |
+| `bengaluru_cubbon_park.jpg` | scene `sparse` → aerial crown path | **3 crown regions** → all `Coniferous Tree` (1.00) · coverage **90.31**% |
+| `hero_aerial.jpg` | scene `sparse` → aerial crown path | **2 crown regions** → `Coniferous Tree` (1.00 / 0.9999) · coverage **86.82**% |
+
+Honest limits of the crown path: the trained canopy segmentation merges touching crowns, so a dense forest aerial yields a modest number of large crown *regions* (measured area is correct and coverage sums the real crown area); granular per-crown splitting would require retraining, which this project deliberately does not do. Coverage is always measured **crown/trunk area ÷ image area** — never classifier confidence.
+
+Graceful-failure cases (expected — keep these honest in demos): an aerial image with no canopy returns `detected_trees: 0` and `species: []` through the crown path; a fuzzy/distant ground photo with no trunks returns `detected_trees: 0`, `species: []` through the trunk path.
 
 ---
 

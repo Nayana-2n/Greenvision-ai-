@@ -3,12 +3,17 @@ import { TreePine } from 'lucide-react';
 // Tree species card for Municipal / Industrial dashboards.
 //
 // Two metrics are displayed SEPARATELY and are never conflated:
-//   - Coverage % : measured pixel area of that species' detected trunks
-//                  divided by the whole image area (geometry from the
-//                  backend's trunk boxes).
-//   - Confidence % : the species classifier's per-trunk confidence.
+//   - Coverage % : measured pixel area of that species' regions divided by
+//                  the whole image area. Aerial scenes use the exact
+//                  tree-crown segmentation area; street scenes use trunk
+//                  bounding-box area.
+//   - Confidence % : the species classifier's per-region confidence.
 //
-// The backend returns both `species` (per trunk, with bounding box) and
+// The effective routing (`analysisView`) decides the wording:
+//   - 'aerial'  -> tree-CROWN regions from the canopy segmentation
+//   - 'street'  -> tree-TRUNK detections
+//
+// The backend returns both `species` (per region, with bounding box) and
 // `speciesCoverage` (grouped per species). If geometry is missing we say so —
 // coverage is NEVER approximated from confidence.
 export default function SpeciesCard({ r, accent = 'canopy', title = 'TREE SPECIES' }) {
@@ -17,11 +22,13 @@ export default function SpeciesCard({ r, accent = 'canopy', title = 'TREE SPECIE
   const chipBg = isBlue ? 'bg-databue/10' : 'bg-canopy/10';
   const chipBorder = isBlue ? 'border-databue/25' : 'border-canopy/25';
   const cardBorder = isBlue ? 'border-databue/20 light:border-databue/10' : 'border-white/10 light:border-black/10';
+  const aerial = r.analysisView === 'aerial';
+  const unitLabel = aerial ? 'crown region' : 'trunk';
 
   const species = Array.isArray(r.species) ? r.species : [];
   const coverage = Array.isArray(r.speciesCoverage) ? r.speciesCoverage : null;
 
-  // Only meaningful on street scenes that ran the trunk detector.
+  // Only meaningful when a tree analysis (crown or trunk) actually ran.
   if (r.species == null && r.detectedTrees == null) return null;
 
   return (
@@ -33,7 +40,7 @@ export default function SpeciesCard({ r, accent = 'canopy', title = 'TREE SPECIE
       {species.length > 0 && coverage ? (
         <>
           <p className="text-[11px] font-mono text-mist-dim light:text-ink/50 mb-3">
-            {r.detectedTrees} trunk{r.detectedTrees === 1 ? '' : 's'} detected &middot; coverage = trunk area / image area &middot; confidence = classifier per trunk
+            {r.detectedTrees} {unitLabel}{r.detectedTrees === 1 ? '' : 's'} detected &middot; coverage = {aerial ? 'crown' : 'trunk'} area / image area &middot; confidence = classifier per {unitLabel}
           </p>
           <div className="space-y-2">
             {coverage.map((c) => (
@@ -42,7 +49,7 @@ export default function SpeciesCard({ r, accent = 'canopy', title = 'TREE SPECIE
                   <TreePine size={13} className={text} />
                   <span className={`text-[12px] font-mono font-semibold ${text}`}>{c.species}</span>
                   <span className="text-[10px] font-mono text-mist-dim light:text-ink/50">
-                    {c.trunk_count} trunk{c.trunk_count === 1 ? '' : 's'}
+                    {c.trunk_count} {unitLabel}{c.trunk_count === 1 ? '' : 's'}
                   </span>
                 </div>
                 <div className="flex items-center gap-4 font-mono text-[11px]">
@@ -66,8 +73,10 @@ export default function SpeciesCard({ r, accent = 'canopy', title = 'TREE SPECIE
       ) : (
         <p className="text-xs text-mist-dim light:text-ink/60 leading-relaxed">
           {r.detectedTrees === 0
-            ? 'No tree trunks were detected in this image, so no species could be identified. Upload a street-level photo where individual trunks are clearly visible to identify species.'
-            : 'This image type (aerial / drone view) does not run the trunk–species analysis. Upload a street-level photo of trees to identify their species.'}
+            ? aerial
+              ? 'No tree crowns were detected in this aerial image, so no species could be identified. Upload an aerial/drone image with visible individual tree crowns.'
+              : 'No tree trunks were detected in this image, so no species could be identified. Upload a street-level photo where individual trunks are clearly visible to identify species.'
+            : 'No species analysis is available for this image type.'}
         </p>
       )}
     </div>

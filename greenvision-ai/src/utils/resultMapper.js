@@ -118,14 +118,17 @@ export function mapReportToScene(report) {
       time: relativeTime(report.timestamp),
     });
   }
-  if (scene === 'street' && detectedTrees != null) {
+  if (detectedTrees != null) {
+    const aerial = report.analysis_view === 'aerial';
     insights.push({
       id: ++insightId,
       type: 'alert',
-      title: 'Trunk detection',
-      text: `The street trunk detector counted ${detectedTrees.toLocaleString()} visible trunks${
-        detectionConf != null ? ` (mean confidence ${Math.round(detectionConf * 100)}%)` : ''
-      } — a measured figure, separate from the canopy area × density estimate.`,
+      title: aerial ? 'Tree-crown detection' : 'Trunk detection',
+      text: aerial
+        ? `The aerial tree-crown analysis identified ${detectedTrees.toLocaleString()} crown region${detectedTrees === 1 ? '' : 's'} from the canopy segmentation — a measured figure, separate from the canopy area × density estimate.`
+        : `The street trunk detector counted ${detectedTrees.toLocaleString()} visible trunks${
+            detectionConf != null ? ` (mean confidence ${Math.round(detectionConf * 100)}%)` : ''
+          } — a measured figure, separate from the canopy area × density estimate.`,
       time: relativeTime(report.timestamp),
     });
   }
@@ -203,11 +206,22 @@ export function mapReportToScene(report) {
     crsEpsg,
     gps: report.gps ?? null,
 
-    // Measured trunk count for street/urban scenes (street detector).
+    // Measured tree count for street/urban scenes (street detector).
     // Distinct from `treeCount` which is the canopy-area × density estimate.
+    // For aerial scenes (analysisView === 'aerial') this is the measured
+    // tree-CROWN region count from the canopy segmentation, not trunks.
     detectedTrees,
     treeDetectionMethod: report.tree_detection_method ?? null,
     treeDetectionConfidence: detectionConf,
+
+    // Effective analysis routing chosen by the pipeline:
+    //   'aerial'  -> tree-crown segmentation path (dense/sparse scenes and
+    //                street-labelled images with strong aerial evidence)
+    //   'street'  -> trunk detector path
+    // The scene classifier label stays in `scene`; this is the routing that
+    // actually produced the tree/species results.
+    analysisView: report.analysis_view ?? null,
+    speciesScope: report.species_scope ?? null,
 
     // Per-trunk species classification (street scenes only).
     species: report.species ?? null,
