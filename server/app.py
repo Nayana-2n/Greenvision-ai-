@@ -1554,18 +1554,7 @@ def location_reverse():
     if err:
         return _error(err, 400)
 
-    # Use Open-Meteo geocoding search — search for cities near the point
-    params = urlencode({
-        "name": f"{lat:.2f} {lng:.2f}",
-        "count": 1,
-        "language": "en",
-        "format": "json",
-    })
-    url = f"{OPEN_METEO_GEO}/search?{params}"
-
-    # Better approach: use the forecast API which returns the timezone/city
-    # Or just do a direct search with nearby city names
-    # Simplest reliable approach: use Nominatim (OpenStreetMap) reverse geocoding
+    # Use Nominatim (OpenStreetMap) reverse geocoding
     nominatim_url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json&addressdetails=1"
     try:
         from urllib.request import Request, urlopen as _urlopen
