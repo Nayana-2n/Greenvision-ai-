@@ -160,44 +160,14 @@ export default function ImpactSimulator({ scene }) {
         </div>
       )}
 
-      <div className="mb-6 border border-white/10 light:border-black/10 rounded-2xl p-4">
-        <p className="text-[10px] font-mono text-mist-dim light:text-ink/50 uppercase tracking-wider mb-3">Climate Effects</p>
-        <div className="space-y-2">
-          {[
-            ['🌡 Temperature reduction', 'UNAVAILABLE', 'No validated thermal model currently available.'],
-            ['💨 Pollution reduction', 'UNAVAILABLE', 'No validated pollutant-reduction model.'],
-            ['💧 Humidity impact', 'UNAVAILABLE', 'No validated local humidity-impact model.'],
-          ].map(([label, status, reason]) => (
-            <div key={label} className="flex items-center justify-between bg-white/5 light:bg-black/5 rounded-xl px-3 py-2">
-              <div><span className="text-xs text-mist light:text-ink font-semibold">{label}</span><p className="text-[10px] text-mist-dim light:text-ink/50">{reason}</p></div>
-              <SourceTag level={status} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-6 bg-white/5 light:bg-black/5 border border-purple-500/20 rounded-2xl p-4">
-        <p className="text-[10px] font-mono text-purple-400 uppercase tracking-wider mb-2">NEXT-GENERATION IMPACT MODELS</p>
-        <div className="grid grid-cols-2 gap-2">
-          {[['🌡 Urban Heat Reduction', 'PLANNED'], ['💨 Air Pollution Reduction', 'PLANNED'], ['💧 Humidity Impact', 'PLANNED'], ['🌳 Biodiversity Impact', 'PLANNED']].map(([l, s]) => (
-            <div key={l} className="flex items-center justify-between bg-white/5 light:bg-black/5 rounded-xl px-3 py-2">
-              <span className="text-[11px] text-mist light:text-ink">{l}</span><SourceTag level={s} />
-            </div>
-          ))}
-        </div>
-        <p className="text-[9px] font-mono text-mist-dim light:text-ink/40 mt-2">These require validated location-specific models and are intentionally not estimated today.</p>
-      </div>
-
       <div className="bg-gradient-to-r from-canopy/10 via-panel to-panel light:from-canopy/5 light:via-white light:to-white border border-canopy/20 rounded-2xl p-5">
         <p className="text-[10px] font-mono text-mist-dim light:text-ink/50 uppercase tracking-wider mb-3">RECOMMENDED INTERVENTION</p>
         <p className="text-xs text-mist light:text-ink/70 mb-3">To move this area toward the {target}% canopy target:</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white/5 light:bg-black/5 rounded-xl p-3 text-center"><p className="font-display font-bold text-lg text-canopy">{gap ? `~${gap.trees_needed.toLocaleString()}` : '—'}</p><p className="text-[9px] font-mono text-mist-dim light:text-ink/50">Trees required</p></div>
           <div className="bg-white/5 light:bg-black/5 rounded-xl p-3 text-center"><p className="font-display font-bold text-lg text-amber-400">{invFmt || '—'}</p><p className="text-[9px] font-mono text-mist-dim light:text-ink/50">Planning investment</p></div>
           <div className="bg-white/5 light:bg-black/5 rounded-xl p-3 text-center"><p className="font-display font-bold text-lg text-canopy">{afterCarbon != null ? `${afterCarbon} t` : '—'}</p><p className="text-[9px] font-mono text-mist-dim light:text-ink/50">Additional CO₂/yr</p></div>
           <div className="bg-white/5 light:bg-black/5 rounded-xl p-3 text-center"><p className="font-display font-bold text-lg text-databue">{afterOxygen != null ? `${afterOxygen} t` : '—'}</p><p className="text-[9px] font-mono text-mist-dim light:text-ink/50">Additional O₂/yr</p></div>
-          <div className="bg-white/5 light:bg-black/5 rounded-xl p-3 text-center"><p className="font-display font-bold text-sm text-red-400">Not currently modeled</p><p className="text-[9px] font-mono text-mist-dim light:text-ink/50">Temperature impact</p></div>
-          <div className="bg-white/5 light:bg-black/5 rounded-xl p-3 text-center"><p className="font-display font-bold text-sm text-red-400">Not currently modeled</p><p className="text-[9px] font-mono text-mist-dim light:text-ink/50">Pollution impact</p></div>
         </div>
       </div>
     </div>

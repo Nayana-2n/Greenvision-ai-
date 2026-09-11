@@ -100,7 +100,7 @@ export default function Planting() {
 
   const gps = r?.gps;
   const manual = r?.userLocation;
-  const stored = getUserLocation();
+  const stored = plannerMode ? null : getUserLocation();
   const [loc, setLoc] = useState(manual ?? stored);
 
   const lat = gps?.lat ?? loc?.lat;

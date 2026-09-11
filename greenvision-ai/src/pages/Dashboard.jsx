@@ -236,10 +236,12 @@ function MunicipalDashboard({ r }) {
                 <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Annual carbon offset</p>
                 <p className="text-xs text-mist light:text-ink font-semibold">{r.carbonOffset != null ? `${r.carbonOffset} t CO₂/yr` : 'Not modeled'}</p>
               </div>
-              <div>
-                <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Priority</p>
-                <p className="text-xs text-mist light:text-ink font-semibold">{r.plantation_priority ?? 'Unknown'}</p>
-              </div>
+              {r.plantation_priority && (
+                <div>
+                  <p className="text-[9px] font-mono text-mist-dim light:text-ink/50 uppercase mb-1">Priority</p>
+                  <p className="text-xs text-mist light:text-ink font-semibold">{r.plantation_priority}</p>
+                </div>
+              )}
             </div>
             <p className="text-[10px] text-mist-dim light:text-ink/50 leading-relaxed">
               Use the simulator above to explore planting scenarios. All figures are transparent planning estimates — not regulatory guarantees.
@@ -405,6 +407,38 @@ function IndustrialSite({ r }) {
             <StatsCard icon={Cloud} label="CO\u2082 Offset" value={r.carbonOffset ?? 'N/A'} unit="t/yr" accent="text-canopy" accentBg="bg-canopy/10" />
             <StatsCard icon={MapPin} label="Site Area" value={r.forestAreaHectares != null ? `${r.forestAreaHectares} ha` : 'N/A'} trend={r.totalAreaHectares ? `of ${r.totalAreaHectares} ha total` : undefined} accent="text-earth" accentBg="bg-earth/10" />
           </div>
+
+          {/* Tree species — trunk-level identification from the uploaded image (street scenes only) */}
+          {(r.species != null || r.detectedTrees != null) && (
+            <div className="mb-8 bg-white/5 light:bg-white border border-databue/20 light:border-databue/10 rounded-2xl p-5 shadow-sm">
+              <p className="text-[10px] font-mono text-databue font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <TreePine size={13} /> TREE SPECIES ON SITE
+              </p>
+              {Array.isArray(r.species) && r.species.length > 0 ? (
+                <>
+                  <p className="text-[11px] font-mono text-mist-dim light:text-ink/50 mb-2">
+                    {r.detectedTrees} trunk{r.detectedTrees === 1 ? '' : 's'} detected from the uploaded image &middot; {r.treeDetectionMethod || 'trunk detector'} &middot; per-tree confidence shown
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {r.species.map((s, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 bg-databue/10 text-databue border border-databue/25 rounded-full px-3 py-1 text-[11px] font-mono">
+                        <TreePine size={12} /> {s.species}
+                        {s.confidence != null && (
+                          <span className="text-mist-dim light:text-ink/50">· {Math.round(s.confidence * 100)}%</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-mist-dim light:text-ink/60 leading-relaxed">
+                  {r.detectedTrees === 0
+                    ? 'No tree trunks were detected in this image, so no species could be identified. Upload a street-level photo where individual trunks are clearly visible to identify species.'
+                    : 'This image type (aerial / drone view) does not run the trunk–species analysis. Upload a street-level photo of trees on the site to identify their species.'}
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="mb-8">
             <ImpactSimulator scene={r} />
