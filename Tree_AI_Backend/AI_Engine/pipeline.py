@@ -314,6 +314,39 @@ class TreeAIPipeline:
                 )
 
         # -----------------------------------------------------
+        # 5c. Authoritative tree count for street/urban scenes
+        # -----------------------------------------------------
+        #
+        # The canopy-area × density heuristic counts trees by dividing the
+        # measured canopy area by a per-m² density figure. On a street /
+        # urban scene the canopy model can over-detect vegetation on roofs,
+        # roads and shadows, inflating that area and driving the estimate
+        # into the thousands even when only a handful of trunks are really
+        # present. The street trunk detector, by contrast, measures actual
+        # detected trunks. When the trunk path ran and produced a measured
+        # count, that count IS the tree number for this scene — the density
+        # heuristic is not presented as if it were a measurement.
+        #
+        # The original heuristic value is preserved in
+        # ``estimated_trees_heuristic`` so the number is never destroyed,
+        # only relabelled by its true source.
+
+        if report["analysis_view"] == "street" and report.get("detected_trees") is not None:
+            report["estimated_trees_heuristic"] = report.get("estimated_trees")
+            report["estimated_trees"] = report["detected_trees"]
+            report["tree_count_source"] = "street trunk detector (measured trunks)"
+            measured = int(report["estimated_trees"])
+            report["carbon_kg_per_year"] = round(measured * 22, 2)
+            report["carbon_tonnes_per_year"] = round(measured * 22 / 1000, 2)
+            report["oxygen_kg_per_year"] = round(measured * 118, 2)
+            report["oxygen_tonnes_per_year"] = round(measured * 118 / 1000, 2)
+            report["equivalent_people_offset"] = round(
+                (measured * 22 / 1000) / 4.7, 2
+            )
+        else:
+            report["tree_count_source"] = "canopy area × density estimate"
+
+        # -----------------------------------------------------
         # 6. Add common pipeline information
         # -----------------------------------------------------
 
@@ -353,8 +386,11 @@ class TreeAIPipeline:
                 "forest_area_m2",
                 "forest_area_hectares",
                 "estimated_trees",
+                "estimated_trees_heuristic",
                 "carbon_tonnes_per_year",
                 "oxygen_tonnes_per_year",
+                "carbon_kg_per_year",
+                "oxygen_kg_per_year",
                 "equivalent_people_offset",
                 "density_class",
                 "density_score",

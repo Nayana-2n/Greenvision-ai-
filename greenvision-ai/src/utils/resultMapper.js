@@ -97,11 +97,15 @@ export function mapReportToScene(report) {
     });
   }
   if (trees != null) {
+    const treeSrc =
+      report.tree_count_source === 'street trunk detector (measured trunks)'
+        ? 'measured street-trunk detection'
+        : 'canopy area × density heuristic';
     insights.push({
       id: ++insightId,
       type: 'alert',
       title: 'Tree estimate',
-      text: `Estimated ${trees.toLocaleString()} trees${density ? ` (${density.toLowerCase()} density)` : ''} — canopy area × density heuristic, not individual detection.`,
+      text: `Estimated ${trees.toLocaleString()} trees${density ? ` (${density.toLowerCase()} density)` : ''} — ${treeSrc}.`,
       time: relativeTime(report.timestamp),
     });
   }
@@ -149,9 +153,13 @@ export function mapReportToScene(report) {
 
   const prompts = [];
   if (trees != null) {
+    const treeSrc =
+      report.tree_count_source === 'street trunk detector (measured trunks)'
+        ? 'measured from the street trunk detector'
+        : 'estimated from the measured canopy area and density';
     prompts.push({
       q: 'How many trees are estimated in this scene?',
-      a: `About ${trees.toLocaleString()} trees, estimated from the measured canopy area and density (${density ?? 'n/a'} density).`,
+      a: `About ${trees.toLocaleString()} trees, ${treeSrc}${density ? ` (${density.toLowerCase()} density)` : ''}.`,
     });
   }
   prompts.push({
